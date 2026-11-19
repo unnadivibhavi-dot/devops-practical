@@ -34,7 +34,8 @@ jobs:
             kubectl logs deployment/flask-deployment --tail=50
             exit 1
           fi
-                - name: Test Kubernetes self-healing
+
+      - name: Test Kubernetes self-healing
         run: |
           echo "Pods before deletion"
           kubectl get pods -l app=flask-web
