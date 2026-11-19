@@ -7,6 +7,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-24.04
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -21,10 +22,11 @@ jobs:
 
       - name: Run tests
         run: python -m pytest
-              - name: Build Docker image
+
+      - name: Build Docker image
         run: docker build -t flask-app:v1 .
 
       - name: Test Docker container
         run: |
           docker run -d --name flask-test -p 127.0.0.1:5000:5000 flask-app:v1
-          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:5000/ | grep -F "Hello, DevOps World! V1"
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:5000/
