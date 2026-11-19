@@ -34,3 +34,25 @@ jobs:
             kubectl logs deployment/flask-deployment --tail=50
             exit 1
           fi
+                - name: Test Kubernetes self-healing
+        run: |
+          echo "Pods before deletion"
+          kubectl get pods -l app=flask-web
+
+          pod_to_delete=$(kubectl get pods -l app=flask-web -o jsonpath='{.items[0].metadata.name}')
+          echo "Deleting pod $pod_to_delete"
+          kubectl delete pod "$pod_to_delete" --timeout=90s
+
+          for attempt in {1..30}; do
+            pod_count=$(kubectl get pods -l app=flask-web -o name | wc -l)
+            if [ "$pod_count" -eq 2 ]; then
+              break
+            fi
+            sleep 2
+          done
+
+          test "$pod_count" -eq 2
+          kubectl wait --for=condition=Ready pods -l app=flask-web --timeout=120s
+
+          echo "Pods after recovery"
+          kubectl get pods -l app=flask-web
